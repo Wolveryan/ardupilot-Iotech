@@ -254,13 +254,36 @@ bool AP_Proximity_Backend::database_prepare_for_push(Vector2f &current_pos, floa
     if (oaDb == nullptr || !oaDb->healthy()) {
         return false;
     }
-
-    if (!AP::ahrs().get_relative_position_NE_origin(current_pos)) {
-        return false;
-    }
+     if (!AP::ahrs().get_relative_position_NE_origin(current_pos)) {
+         return false;
+     }
 
     current_heading = AP::ahrs().yaw_sensor * 0.01f;
     return true;
+}
+
+void AP_Proximity_Backend::database_lat_lng_push(Location obstacle_loc, float distance)
+{
+    AP_OADatabase *oaDb = AP::oadatabase();
+    if (oaDb == nullptr || !oaDb->healthy()) {
+        return;
+    }
+
+    Vector2f obstacle_pos;
+
+    if (!obstacle_loc.get_vector_xy_from_origin_NE(obstacle_pos)) {
+        return;
+    }
+
+    Location ekf_origin;
+    if (!AP::ahrs().get_origin(ekf_origin)) {
+        return;
+    }
+
+    obstacle_pos.x = (obstacle_loc.lat-ekf_origin.lat) * LATLON_TO_M;
+    obstacle_pos.y = (obstacle_loc.lng-ekf_origin.lng) * LATLON_TO_M * ekf_origin.longitude_scale();
+
+    oaDb->queue_push(obstacle_pos, AP_HAL::millis(), distance);
 }
 
 // update Object Avoidance database with Earth-frame point

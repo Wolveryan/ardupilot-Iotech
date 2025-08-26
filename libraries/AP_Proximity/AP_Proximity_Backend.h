@@ -79,6 +79,8 @@ protected:
     //   the boundary point is set to the shortest distance found in the two adjacent sectors, this is a conservative boundary around the vehicle
     void update_boundary_for_sector(const uint8_t sector, const bool push_to_OA_DB);
 
+    void database_lat_lng_push(Location obstacle_loc,  float distance);
+
     // check if a reading should be ignored because it falls into an ignore area
     // angles should be in degrees and in the range of 0 to 360
     bool ignore_reading(uint16_t angle_deg) const;

@@ -29,13 +29,17 @@
 #include <AP_HAL_ChibiOS/CAN.h>
 #include <AP_HAL_ChibiOS/CANSerialRouter.h>
 #endif
-
 #include <AP_Vehicle/AP_Vehicle.h>
 #include <AP_UAVCAN/AP_UAVCAN_SLCAN.h>
 #include <AP_UAVCAN/AP_UAVCAN.h>
 #include <AP_KDECAN/AP_KDECAN.h>
 #include <AP_ToshibaCAN/AP_ToshibaCAN.h>
 #include <AP_SerialManager/AP_SerialManager.h>
+#include <AP_Proximity/AP_Proximity.h>
+#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+#include <AP_HAL_ChibiOS/R21_Backend.h>
+#include "AP_HAL_ChibiOS/IRadar_Backend.h"
+#endif
 extern const AP_HAL::HAL& hal;
 
 // table of user settable parameters
@@ -134,6 +138,21 @@ void AP_BoardConfig_CAN::init()
         }
     }
 
+#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+    AP_Proximity *prx = AP::proximity();
+    if(prx != nullptr){
+        if(prx->get_type(0) == AP_Proximity::Type::LintechR21)
+        {
+            R21_Backend *_r21_backend = AP::_backend();
+            _r21_backend->r21_init_thread();
+        }
+        else if(prx->get_type(0) == AP_Proximity::Type::IRadar)
+        {
+            IR24_Backend *_ir24_backend = AP::__backend();
+            _ir24_backend->ir24_init_thread();
+        }
+    }
+#endif
     if (initret) {
         for (uint8_t i = 0; i < MAX_NUMBER_OF_CAN_DRIVERS; i++) {
             Protocol_Type prot_type = _drivers[i]._protocol_type_cache = (Protocol_Type) _drivers[i]._protocol_type.get();

@@ -24,6 +24,13 @@
 #include "AP_Proximity_SITL.h"
 #include "AP_Proximity_MorseSITL.h"
 #include "AP_Proximity_AirSimSITL.h"
+#if CONFIG_HAL_BOARD == HAL_BOARD_SITL
+#include "AP_Proximity_PYSITL.h"
+#endif
+#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+#include "AP_Proximity_LintechR21.h"
+#include "AP_Proximity_IRadar.h"
+#endif
 #include <AP_AHRS/AP_AHRS.h>
 
 extern const AP_HAL::HAL &hal;
@@ -155,7 +162,7 @@ const AP_Param::GroupInfo AP_Proximity::var_info[] = {
     // @Param: 2_TYPE
     // @DisplayName: Second Proximity type
     // @Description: What type of proximity sensor is connected
-    // @Values: 0:None,7:LightwareSF40c,1:LightWareSF40C-legacy,2:MAVLink,3:TeraRangerTower,4:RangeFinder,5:RPLidarA2,6:TeraRangerTowerEvo,10:SITL,11:MorseSITL,12:AirSimSITL
+    // @Values: 0:None,7:LightwareSF40c,1:LightWareSF40C-legacy,2:MAVLink,3:TeraRangerTower,4:RangeFinder,5:RPLidarA2,6:TeraRangerTowerEvo,10:SITL,11:MorseSITL,12:AirSimSITL,15:IoTechRadar
     // @User: Advanced
     // @RebootRequired: True
     AP_GROUPINFO("2_TYPE", 16, AP_Proximity, _type[1], 0),
@@ -176,6 +183,137 @@ const AP_Param::GroupInfo AP_Proximity::var_info[] = {
     AP_GROUPINFO("2_YAW_CORR", 18, AP_Proximity, _yaw_correction[1], 0),
 #endif
 
+#if PROXIMITY_MAX_INSTANCES > 0
+
+    // @Param: ENB_FIL
+    // @DisplayName: Enable filter for PRX
+    // @Description: Enable filter for PRX
+    // @Values: 0 1
+    // @User: Standard
+    AP_GROUPINFO("_EN_FLT", 19, AP_Proximity, _enable_filter, true),
+
+    // @Param: GLI_VAL
+    // @DisplayName: Glitch value
+    // @Description: Glitch value
+    // @Values: 0 200.0
+    // @User: Standard
+    AP_GROUPINFO("_GLI_VAL", 20, AP_Proximity, _glitch_val, 1.0f),
+
+    // @Param: DIS_MIN
+    // @DisplayName: Minimum distance 
+    // @Description: Minimum distance in meter
+    // @Values: 0 10
+    // @User: Standard
+    AP_GROUPINFO("_DIS_MIN", 21, AP_Proximity, _min_dist, 2.0f),
+
+    // @Param: DIS_MAX
+    // @DisplayName: Maximum distance 
+    // @Description: Maximum distance in meter
+    // @Values: 0 10
+    // @User: Standard
+    AP_GROUPINFO("_DIS_MAX", 22, AP_Proximity, _max_dist, 25.0f),
+
+    // @Param: GLI_SAM
+    // @DisplayName: Maximum glitch sample 
+    // @Description: Maximum glitch sample
+    // @Values: 0 100
+    // @User: Standard
+    AP_GROUPINFO("_GLI_SAM", 23, AP_Proximity,_glitch_sample_no,3),
+
+    // @Param: FOV_LIM
+    // @DisplayName: FOV LIMIT for positive and negative sectors
+    // @Description: FOV LIMIT for positive and negative sectors
+    // @Values: 0 100
+    // @User: Standard
+    AP_GROUPINFO("_FOV_LIM", 24, AP_Proximity,_fov_limit,25),
+
+    // @Param: ENB_FIL
+    // @DisplayName: Enable MAVG filter for PRX
+    // @Description: Enable Moving Average filter for PRX
+    // @Values: 0 1
+    // @User: Standard
+    AP_GROUPINFO("_EN_MAVG", 25, AP_Proximity, _enable_mavg_filter, true),
+
+    // @Param: EN_GLA1
+    // @DisplayName: Glitch Angle when further than 5m from object
+    // @Description: Glitch Angle when further than 5m from object
+    // @Values: 0 10
+    // @User: Standard
+    AP_GROUPINFO("_GLA1", 26, AP_Proximity, _glitch_angle, 5.6f),
+
+    // @Param: EN_GLA2
+    // @DisplayName: Glitch Angle when Closer than 5m from object
+    // @Description: Glitch Angle when Closer than 5m from object, The Closer We get, the more the chances are that 
+    //               object will cover the whole quadrant and it will be true data
+    // @Values: 0 90
+    // @User: Standard
+    AP_GROUPINFO("_GLA2", 27, AP_Proximity, _glitch_angle2, 90.0f),
+
+    // @Param: EN_GLA2
+    // @DisplayName: Glitch Angle Switching Distance
+    // @Description: Distance at which Glitch_angle2 fov is used as primary glitch angle
+    // @Values: 0 90
+    // @User: Standard
+    AP_GROUPINFO("_GLASWD", 28, AP_Proximity, _glitch_angle_dist, 5.0f),
+
+    // @Param: EN_S
+    // @DisplayName: Enable scope in moving direction
+    // @Description: Distance at which Glitch_angle2 fov is used as primary glitch angle
+    // @Values: 0 90
+    // @User: Standard
+    AP_GROUPINFO("_EN_S", 29, AP_Proximity, _enable_scope, 1),
+    
+    // @Param: YAW_DEG
+    // @DisplayName: Enable scope in moving direction
+    // @Description: Distance at which Glitch_angle2 fov is used as primary glitch angle
+    // @Values: 0 90
+    // @User: Standard
+    AP_GROUPINFO("_YAW_DEG", 30, AP_Proximity, _yaw_degree, 5),
+    
+    // @Param: YAW_CT
+    // @DisplayName: Enable scope in moving direction
+    // @Description: Distance at which Glitch_angle2 fov is used as primary glitch angle
+    // @Values: 0 90
+    // @User: Standard
+    AP_GROUPINFO("_YAW_CT", 31, AP_Proximity, _yaw_count, 25),
+    
+    // @Param: YAW_EN
+    // @DisplayName: Enable scope in moving direction
+    // @Description: Distance at which Glitch_angle2 fov is used as primary glitch angle
+    // @Values: 0 90
+    // @User: Standard
+    AP_GROUPINFO("_YAW_EN", 32, AP_Proximity, _yaw_enable, 1),
+
+    AP_GROUPINFO("_Y_CORR_EN", 33, AP_Proximity, _y_correction_enable, 1),
+
+    AP_GROUPINFO("_M_PTS", 34, AP_Proximity, _min_pts, 2),
+
+    AP_GROUPINFO("_EPSLN", 35, AP_Proximity, _epsilon, 1),
+ 
+    // @Param: ATT_EN
+    // @DisplayName: Enables attitude data transimiison
+    // @Description: Transmit roll, pitch, speed data ino the radar
+    // @Values: 0 1
+    // @User: Standard
+    AP_GROUPINFO("_ATT_EN", 36, AP_Proximity, _att_enable, 0),
+
+    AP_GROUPINFO("_MP_OA", 37, AP_Proximity, _m_pts, 1),
+
+    // @Param: _PT_DIS_MAR
+    // @DisplayName: Pitch Disable Margin
+    // @Description: Margin from target at which pitch in target direction will be disabled 
+    // @Values: 0 10.0
+    // @User: Advanced
+    AP_GROUPINFO("_PT_DIS_MAR", 38, AP_Proximity, _pitch_disable_margin, 6.0f),
+
+    // @Param: _PT_MAR_EN
+    // @DisplayName: Pitch Disable on Margin Breach
+    // @Description: Enable/Disable pitch disbale function
+    // @Values: 0 1
+    // @User: Standard
+    AP_GROUPINFO("_PT_MAR_EN", 39, AP_Proximity, _pitch_mar_en, 1),
+#endif
+
     AP_GROUPEND
 };
 
@@ -194,6 +332,9 @@ AP_Proximity::AP_Proximity()
 // we don't allow for hot-plugging of sensors (i.e. reboot required)
 void AP_Proximity::init(void)
 {
+    if (_att_enable == 2) {
+        _att_enable.set_and_save(1);
+    }
     if (num_instances != 0) {
         // init called a 2nd time?
         return;
@@ -227,6 +368,7 @@ void AP_Proximity::update(void)
             primary_instance = i;
         }
     }
+
 }
 
 // return sensor orientation
@@ -342,6 +484,24 @@ void AP_Proximity::detect_instance(uint8_t instance)
     case Type::AirSimSITL:
         state[instance].instance = instance;
         drivers[instance] = new AP_Proximity_AirSimSITL(*this, state[instance]);
+        return;
+#endif
+#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+    case Type::LintechR21:
+        state[instance].instance = instance;
+        drivers[instance] = new AP_Proximity_LintechR21(*this, state[instance]);
+        return;
+#endif
+#if CONFIG_HAL_BOARD == HAL_BOARD_SITL
+    case Type::PYSITL:
+        state[instance].instance = instance;
+        drivers[instance] = new AP_Proximity_PYSITL(*this, state[instance]);
+        return;
+#endif
+#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+    case Type::IRadar:
+        state[instance].instance = instance;
+        drivers[instance] = new AP_Proximity_IR24(*this, state[instance]);
         return;
 #endif
     }

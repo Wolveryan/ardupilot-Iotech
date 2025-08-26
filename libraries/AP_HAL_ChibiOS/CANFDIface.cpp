@@ -46,6 +46,10 @@
 #include "CANClock.h"
 #include "CANInternal.h"
 #include "CANSerialRouter.h"
+#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+#include "R21_Backend.h"
+#include "IRadar_Backend.h"
+#endif
 #include <AP_UAVCAN/AP_UAVCAN_SLCAN.h>
 #include <AP_Math/AP_Math.h>
 # include <hal.h>
@@ -124,7 +128,10 @@ uint32_t CanIface::FDCANMessageRAMOffset_ = 0;
 #if AP_UAVCAN_SLCAN_ENABLED
 SLCANRouter CanIface::_slcan_router;
 #endif
-
+#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+R21_Backend *r21_backend = R21_Backend::get_singleton();
+IR24_Backend *ir24_backend = IR24_Backend::get_singleton();
+#endif
 CanIface::CanIface(fdcan::CanType* can, BusEvent& update_event, uavcan::uint8_t self_index,
             CanRxItem* rx_queue_buffer, uavcan::uint8_t rx_queue_capacity)
     : rx_queue_(rx_queue_buffer, rx_queue_capacity)
@@ -622,6 +629,10 @@ void CanIface::handleTxCompleteInterrupt(const uavcan::uint64_t utc_usec)
 
 bool CanIface::readRxFIFO(uavcan::uint8_t fifo_index)
 {
+#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+    R21_Backend *_r21_backend = AP::_backend();
+    IR24_Backend *_ir24_backend = AP::__backend();
+#endif
     UAVCAN_ASSERT(fifo_index < 2);
     uint32_t *frame_ptr;
     uint32_t index;
@@ -682,6 +693,7 @@ bool CanIface::readRxFIFO(uavcan::uint8_t fifo_index)
     frame.dlc = (frame_ptr[1] & fdcan::DLC_MASK) >> 16;
     uint8_t *data = (uint8_t*)&frame_ptr[2];
     //We only handle Data Length of 8 Bytes for now
+    // Data is fetched here
     for (uint8_t i = 0; i < 8; i++) {
         frame.data[i] = data[i];
     }
@@ -699,6 +711,32 @@ bool CanIface::readRxFIFO(uavcan::uint8_t fifo_index)
     rx_queue_.push(frame, utc_usec, 0);
 #if AP_UAVCAN_SLCAN_ENABLED
     _slcan_router.route_frame_to_slcan(this, frame, utc_usec);
+#endif
+    uint16_t pk_pri =  (frame.id & 0xFF) | (frame.id & (0xFF00));
+
+#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+    if(pk_pri == R21_Backend::enum_R21_CANID::R21_front || pk_pri == R21_Backend::enum_R21_CANID::R21_rear)
+    {
+        _r21_backend->route_frame_to_r21_backend(frame, utc_usec);
+
+        if(_r21_backend->r21_get_r21_sem_init() == true)
+        {
+            chSysLockFromISR();
+            chBSemSignalI(_r21_backend->get_r21_sem());
+            chSysUnlockFromISR();
+        }
+    }
+    if(pk_pri == IR24_Backend::enum_IR24_CANID::IR24_front || pk_pri == IR24_Backend::enum_IR24_CANID::IR24_rear || pk_pri == IR24_Backend::enum_IR24_CANID::IR24_rangefinder)
+    {
+        _ir24_backend->route_frame_to_ir24_backend(frame, utc_usec);
+
+        if(_ir24_backend->ir24_get_ir24_sem_init() == true)
+        {
+            chSysLockFromISR();
+            chBSemSignalI(_ir24_backend->get_ir24_sem());
+            chSysUnlockFromISR();
+        }
+    }
 #endif
     return true;
 }

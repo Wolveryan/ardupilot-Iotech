@@ -52,6 +52,15 @@ public:
         MorseSITL = 11,
         AirSimSITL = 12,
 #endif
+#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+        LintechR21 = 13,
+#endif
+#if CONFIG_HAL_BOARD == HAL_BOARD_SITL
+        PYSITL = 14,
+#endif
+#if CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+        IRadar = 15
+#endif
     };
 
     enum Status {
@@ -135,6 +144,34 @@ public:
     bool sensor_enabled() const;
     bool sensor_failed() const;
 
+    AP_Int8  _enable_filter;        // Enable Filter
+    AP_Int8  _enable_mavg_filter;   // Enable MAvg Filter
+    AP_Float _glitch_val;           // Glitch distance in x
+    AP_Float _glitch_angle;         // Glitch Angle allowed in degrees
+    AP_Float _glitch_angle2;        // Glitch Angle allowed in degrees, when closer than 5m
+    AP_Float _glitch_angle_dist;    // distance at which the _glitch_angle2 is used primarily as glitch angle
+    AP_Float _max_dist;             //Maximum define distance
+    AP_Float _min_dist;             //Minimum distance
+    AP_Int8  _glitch_sample_no;     // Number of Glitch samples
+    AP_Float _fov_limit;            //Fov limit for r21
+    AP_Int8 _enable_scope;
+    AP_Int8 _yaw_degree;
+    AP_Int8 _yaw_count;
+    AP_Int8 _yaw_enable;
+    AP_Int8 _y_correction_enable;
+    AP_Int8 _min_pts;
+    AP_Int8 _epsilon;
+    AP_Int8 _m_pts;
+    AP_Int8 _att_enable;            
+    AP_Float _pitch_disable_margin;
+    AP_Int8  _pitch_mar_en;
+
+
+
+    float get_min_dist() {return _min_dist;}
+
+  
+
 private:
     static AP_Proximity *_singleton;
     Proximity_State state[PROXIMITY_MAX_INSTANCES];
@@ -157,6 +194,9 @@ private:
     AP_Int8 _ignore_width_deg[PROXIMITY_MAX_IGNORE];    // width of beam (in degrees) that should be ignored
 
     void detect_instance(uint8_t instance);
+
+   
+    
 };
 
 namespace AP {
