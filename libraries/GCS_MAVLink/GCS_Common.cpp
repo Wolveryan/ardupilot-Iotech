@@ -1694,7 +1694,7 @@ void GCS_MAVLINK::send_scaled_pressure_instance(uint8_t instance, void (*send_fn
 
 void GCS_MAVLINK::send_scaled_pressure()
 {
-    send_scaled_pressure_instance(0, mavlink_msg_scaled_pressure_send, 0);
+    send_scaled_pressure_instance(0, mavlink_msg_scaled_pressure_send);
 }
 
 void GCS_MAVLINK::send_scaled_pressure2()
