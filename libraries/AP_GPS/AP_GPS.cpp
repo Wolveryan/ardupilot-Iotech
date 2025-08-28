@@ -1165,7 +1165,8 @@ void AP_GPS::send_mavlink_gps2_raw(mavlink_channel_t chan)
         num_sats(1),
         state[1].rtk_num_sats,
         state[1].rtk_age_ms,
-        gps_yaw_cdeg(1));
+        gps_yaw_cdeg(1),
+        0, 0, 0, 0, 0);
 }
 #endif // GPS_MAX_RECEIVERS
 
