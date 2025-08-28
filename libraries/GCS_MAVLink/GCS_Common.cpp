@@ -236,7 +236,11 @@ void GCS_MAVLINK::send_battery_status(const uint8_t instance) const
                                     consumed_wh,  // consumed energy in hJ (hecto-Joules)
                                     battery.capacity_remaining_pct(instance),
                                     0, // time remaining, seconds (not provided)
-                                    MAV_BATTERY_CHARGE_STATE_UNDEFINED);
+                                    MAV_BATTERY_CHARGE_STATE_UNDEFINED,
+				    // Missing parameters (likely):
+                                    fault_bitmask, // uint8_t - battery fault bitmask
+                                    0, // const uint16_t* - cell voltages extended
+                                    0); // uint32_t - mode bitmask or similar
 }
 
 // returns true if all battery instances were reported
