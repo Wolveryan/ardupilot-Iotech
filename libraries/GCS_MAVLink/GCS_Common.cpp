@@ -505,7 +505,7 @@ void GCS_MAVLINK::handle_mission_set_current(AP_Mission &mission, const mavlink_
 
     // set current command
     if (mission.set_current_cmd(packet.seq)) {
-        mavlink_msg_mission_current_send(chan, packet.seq);
+        mavlink_msg_mission_current_send(chan, packet.seq, packet.seq, 0, 0);
     }
 }
 
