@@ -385,7 +385,7 @@ void GCS_MAVLINK::send_proximity() const
                 PROXIMITY_SENSOR_ID_START + PROXIMITY_MAX_DIRECTION + 1,  // onboard ID of the sensor
                 MAV_SENSOR_ROTATION_PITCH_90,                             // direction upwards
                 0,                                                        // Measurement covariance in centimeters, 0 for unknown / invalid readings
-                0, 0, nullptr);
+                0, 0, nullptr,0);
     }
 }
 
