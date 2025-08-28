@@ -275,7 +275,8 @@ void GCS_MAVLINK::send_distance_sensor(const AP_RangeFinder_Backend *sensor, con
         0,                                       // Measurement covariance in centimeters, 0 for unknown / invalid readings
         0,                                       // horizontal FOV
         0,                                       // vertical FOV
-        (const float *)nullptr);                 // quaternion of sensor orientation for MAV_SENSOR_ROTATION_CUSTOM
+        (const float *)nullptr,
+	0);                 // quaternion of sensor orientation for MAV_SENSOR_ROTATION_CUSTOM
 }
 // send any and all distance_sensor messages.  This starts by sending
 // any distance sensors not used by a Proximity sensor, then sends the

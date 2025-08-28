@@ -22,6 +22,7 @@
 #include "AP_RangeFinder_LightWareI2C.h"
 #include "AP_RangeFinder_LightWareSerial.h"
 #include "AP_RangeFinder_Iotech_Radar.h"
+#include "AP_RangeFinder_Iotech_Radar.cpp"
 #if (CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_LINUX_BEBOP || \
      CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_LINUX_DISCO) &&      \
     defined(HAVE_LIBIIO)
