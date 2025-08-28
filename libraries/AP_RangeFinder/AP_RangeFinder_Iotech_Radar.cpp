@@ -1,5 +1,5 @@
 #include <AP_HAL/AP_HAL.h>
-#include "AP_RangeFinder_IOTECH_RADAR.h"
+#include "AP_RangeFinder_Iotech_Radar.h"
 #include <AP_SerialManager/AP_SerialManager.h>
 #include <AP_Logger/AP_Logger.h>
 #include <ctype.h>
