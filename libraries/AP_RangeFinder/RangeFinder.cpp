@@ -14,6 +14,7 @@
  */
 
 #include "RangeFinder.h"
+#include "AP_RangeFinder_IOTECH_RADAR.h"
 #include "AP_RangeFinder_analog.h"
 #include "AP_RangeFinder_PulsedLightLRF.h"
 #include "AP_RangeFinder_MaxsonarI2CXL.h"
@@ -21,8 +22,6 @@
 #include "AP_RangeFinder_BBB_PRU.h"
 #include "AP_RangeFinder_LightWareI2C.h"
 #include "AP_RangeFinder_LightWareSerial.h"
-#include "AP_RangeFinder_IOTECH_RADAR.h"
-#include "AP_RangeFinder_IOTECH_RADAR.cpp"
 #if (CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_LINUX_BEBOP || \
      CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_LINUX_DISCO) &&      \
     defined(HAVE_LIBIIO)
@@ -326,7 +325,7 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
     enum RangeFinder_Type _type = (enum RangeFinder_Type)params[instance].type.get();
     switch (_type) {
     case RangeFinder_TYPE_IOTECH_Radar:
-            if( AP_RangeFinder_IOTECH_RADAR::detect()){
+            if(AP_RangeFinder_IOTECH_RADAR::detect()){
                drivers[instance] = new AP_RangeFinder_IOTECH_RADAR(state[instance], params[instance]);
             }
             break;
