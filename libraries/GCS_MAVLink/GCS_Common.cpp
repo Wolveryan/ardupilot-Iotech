@@ -1665,7 +1665,7 @@ void GCS_MAVLINK::send_scaled_pressure_instance(
                     float press_abs,
                     float press_diff,
                     int16_t temperature)) 
-    {
+{
     const AP_Baro &barometer = AP::baro();
 
     bool have_data = false;
@@ -1695,7 +1695,7 @@ void GCS_MAVLINK::send_scaled_pressure_instance(
         AP_HAL::millis(),
         press_abs, // hectopascal
         press_diff, // hectopascal
-        temperature); // 0.01 degrees C
+        temperature, 0); // 0.01 degrees C
 }
 
 void GCS_MAVLINK::send_scaled_pressure()
