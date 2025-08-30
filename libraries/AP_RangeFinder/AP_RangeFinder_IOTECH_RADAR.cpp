@@ -27,9 +27,8 @@ AP_RangeFinder_IOTECH_RADAR::AP_RangeFinder_IOTECH_RADAR(RangeFinder::RangeFinde
    trying to take a reading on Serial. If we get a result the sensor is
    there.
 */
-bool AP_RangeFinder_IOTECH_RADAR::detect()
-{
-    return true;
+bool AP_RangeFinder_IOTECH_RADAR::detect(){
+return true;
 }
 
 // read - return last value measured by sensor
