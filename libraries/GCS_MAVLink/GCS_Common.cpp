@@ -1664,7 +1664,7 @@ void GCS_MAVLINK::send_scaled_pressure_instance(
                     uint32_t time_boot_ms,
                     float press_abs,
                     float press_diff,
-                    int16_t temperature, init16_t )) 
+                    int16_t temperature, int16_t )) 
 {
     const AP_Baro &barometer = AP::baro();
 
