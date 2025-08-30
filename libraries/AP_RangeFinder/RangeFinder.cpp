@@ -326,7 +326,7 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
     enum RangeFinder_Type _type = (enum RangeFinder_Type)params[instance].type.get();
     switch (_type) {
     case RangeFinder_TYPE_IOTECH_Radar:
-            if(AP_RangeFinder_IOTECH_RADAR::detect()){
+            if( AP_RangeFinder_IOTECH_RADAR::detect()){
                drivers[instance] = new AP_RangeFinder_IOTECH_RADAR(state[instance], params[instance]);
             }
             break;
