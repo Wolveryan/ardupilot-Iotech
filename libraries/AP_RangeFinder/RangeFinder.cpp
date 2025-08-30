@@ -327,8 +327,8 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
     case RangeFinder_TYPE_IOTECH_Radar:
             if(AP_RangeFinder_IOTECH_RADAR::detect()){
                drivers[instance] = new AP_RangeFinder_IOTECH_RADAR(state[instance], params[instance]);
-            }
             break;
+            }
 
     case RangeFinder_TYPE_PLI2C:
     case RangeFinder_TYPE_PLI2CV3:
